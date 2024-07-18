@@ -135,7 +135,7 @@ int main() {
             m_path.push_back(sf::Vector2f(pos));
 
             for (size_t i=1; i<m_path.size(); ++i){
-                sfLine l(m_path[i-1].first, m_path[i].first, sf::Color::Blue, lineThickness);
+                sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness);
                 l.draw(window, sf::RenderStates());
             }
 
