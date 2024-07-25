@@ -1,7 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <Drawing.hpp>
-#include <consts.hpp>
+#include <Consts.hpp>
 #include <DFT.hpp>
 #include <Signal.hpp>
 #include <Lines.hpp>
@@ -11,10 +11,19 @@ std::vector<Cycloid> cycles;
 Signal sig = Signal();
 bool drawing = false;
 
+//double speedMulti;
+sf::Transform t;
+Point origin;
+
 int maxCoef = 10;
 //int fadingLength = 300; // number of points that fade
 //float stoppingPercentage = 0.95; // percentage of one rotation untill path disapperas
 float lineThickness = 3;
+
+std::chrono::high_resolution_clock::time_point start;
+std::chrono::high_resolution_clock::time_point end;
+double fps = -1.0;
+
 
 void compute(Point origin){
     std::vector<complex> points = sig.getComplex();
@@ -23,7 +32,7 @@ void compute(Point origin){
     f.DFT();
     f.sortRes();
     cycles = f.constructEpicycles();
-    if (cycles.size() > 0){
+    if (!cycles.empty()){
         drawing = true;
     }
 }
@@ -39,13 +48,21 @@ int main() {
 
 
     std::deque<sf::Vector2f> m_path; // point, time
-    Point origin(window.getSize().x/2, window.getSize().y/2);
+    origin = Point(window.getSize().x/2, window.getSize().y/2);
+
+    sf::Transform t = sf::Transform::Identity;
+    t.translate(sf::Vector2f(origin));
+    t.scale(2, 2);
+    t.translate(-sf::Vector2f(origin));
 
     sf::Clock clock;
     bool clicking = false;
     while (window.isOpen())
     {
         sf::Event event;
+
+        start = std::chrono::high_resolution_clock::now();
+
 
         while (window.pollEvent(event))
         {
@@ -121,6 +138,11 @@ int main() {
             window.draw(texts[i]);
         }
 
+        /* FPS */
+        sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
+        fpsText.setFillColor(sf::Color::White);
+        fpsText.setPosition(window.getSize().x-100, 10);
+        window.draw(fpsText);
 
 
         /*   Drawing Epicycles   */
@@ -136,13 +158,21 @@ int main() {
 
             for (size_t i=1; i<m_path.size(); ++i){
                 sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness);
-                l.draw(window, sf::RenderStates());
+                sf::RenderStates r;
+                r.transform = t;
+                l.draw(window, r);
             }
 
             for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
-                cycles[i].draw(window);
+                sf::RenderStates r;
+                r.transform = t;
+                cycles[i].draw(window, r);
             }
         }
+
+        end = std::chrono::high_resolution_clock::now();
+        fps = (double)1e9/(double)std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+
 
         window.display();
 

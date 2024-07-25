@@ -1,5 +1,5 @@
 #include <complex>
-#include <point.hpp>
+#include <Point.hpp>
 
 using complex = std::complex<double>;
 

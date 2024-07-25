@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 
-#include <consts.hpp>
-#include <point.hpp>
+#include <Consts.hpp>
+#include <Point.hpp>
 #include <Lines.hpp>
 
 struct Cycloid {
@@ -89,10 +89,11 @@ struct Cycloid {
         }
     }
 
-    void draw(sf::RenderWindow &window){
-        window.draw(arrow);
+    void draw(sf::RenderWindow &window, sf::RenderStates &r){
+
+        window.draw(arrow, r);
 //        line.draw(window, sf::RenderStates());
-        window.draw(trace);
+        window.draw(trace, r);
     }
 
     private:

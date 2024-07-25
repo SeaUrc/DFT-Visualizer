@@ -53,9 +53,9 @@ public:
         color = c;
     }
 
-    void draw(sf::RenderTarget &target, sf::RenderStates states) const
+    void draw(sf::RenderTarget &target, sf::RenderStates r) const
     {
-        target.draw(vertices,4,sf::Quads);
+        target.draw(vertices,4,sf::Quads,r);
     }
 
 
