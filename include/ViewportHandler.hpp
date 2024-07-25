@@ -24,7 +24,7 @@ struct ViewState{
 
     void updateMouse(sf::Vector2f pos){
         mousePos = pos;
-        mouseAbsPos = offset + (pos - center)/zoom;
+        mouseAbsPos = offset + (pos - origin)/zoom;
     }
 };
 
