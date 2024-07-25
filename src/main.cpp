@@ -5,6 +5,7 @@
 #include <DFT.hpp>
 #include <Signal.hpp>
 #include <Lines.hpp>
+#include <ViewportHandler.hpp>
 #include <deque>
 
 std::vector<Cycloid> cycles;
@@ -12,13 +13,13 @@ Signal sig = Signal();
 bool drawing = false;
 
 //double speedMulti;
-sf::Transform t;
-Point origin;
+
 
 int maxCoef = 10;
 //int fadingLength = 300; // number of points that fade
 //float stoppingPercentage = 0.95; // percentage of one rotation untill path disapperas
 float lineThickness = 3;
+
 
 std::chrono::high_resolution_clock::time_point start;
 std::chrono::high_resolution_clock::time_point end;
@@ -46,14 +47,14 @@ int main() {
         throw "Can't load font!";
     }
 
-
+    ViewportHandler v(sf::Vector2f(window.getSize()));
     std::deque<sf::Vector2f> m_path; // point, time
-    origin = Point(window.getSize().x/2, window.getSize().y/2);
 
-    sf::Transform t = sf::Transform::Identity;
-    t.translate(sf::Vector2f(origin));
-    t.scale(2, 2);
-    t.translate(-sf::Vector2f(origin));
+//    sf::Transform t = sf::Transform::Identity;
+//    t.translate(sf::Vector2f(origin));
+//    t.scale(1.5, 1.5);
+//    t.translate(-sf::Vector2f(origin));
+//    t.translate((float)100/(float)1.5, 0);
 
     sf::Clock clock;
     bool clicking = false;
@@ -83,7 +84,7 @@ int main() {
             }
             if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::C){
-                    compute(origin);
+                    compute(Point(v.getOrigin()));
                     m_path.clear();
 //                    std::cout << "computed " << cycles[0] << std::endl;
                 }
@@ -107,14 +108,15 @@ int main() {
                 if (event.key.code == sf::Keyboard::W){
                     lineThickness += 0.5;
                 }
-
             }
             // sf::Event::MouseMoved
         }
 
 
         if (clicking){
-            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin);
+            v.setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
+            sig.addPoint(v.getAbsoluteMousePos());
+//            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y));
 //            std::cout << "add point " << Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin << std::endl;
         }
 
@@ -159,13 +161,13 @@ int main() {
             for (size_t i=1; i<m_path.size(); ++i){
                 sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness);
                 sf::RenderStates r;
-                r.transform = t;
+                r.transform = v.getTransform();
                 l.draw(window, r);
             }
 
             for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
                 sf::RenderStates r;
-                r.transform = t;
+                r.transform = v.getTransform();
                 cycles[i].draw(window, r);
             }
         }

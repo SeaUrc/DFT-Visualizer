@@ -13,6 +13,9 @@ struct Point {
     Point(double inX, double inY) : x(inX), y(inY){
     }
 
+    Point(sf::Vector2f v): x(v.x), y(v.y){
+    }
+
     operator complex() const {
         return complex(x, y);
     }
