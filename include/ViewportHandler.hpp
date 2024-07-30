@@ -18,9 +18,10 @@ struct ViewState{
     void update(){
         t = sf::Transform::Identity;
         t.translate(origin);
+        t.translate(-center*zoom);
         t.scale(zoom, zoom);
         t.translate(-origin);
-        t.translate(center);
+
     }
 
     void updateMouse(sf::Vector2f pos){

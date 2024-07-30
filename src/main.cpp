@@ -25,6 +25,8 @@ std::chrono::high_resolution_clock::time_point start;
 std::chrono::high_resolution_clock::time_point end;
 double fps = -1.0;
 
+bool tracking = false;
+
 
 void compute(Point origin){
     std::vector<complex> points = sig.getComplex();
@@ -49,11 +51,13 @@ int main() {
 
     ViewportHandler v(sf::Vector2f(window.getSize()));
     std::deque<sf::Vector2f> m_path; // point, time
-
+//    sf::Vector2f origin(window.getSize().x/2, window.getSize().y/2);
 //    sf::Transform t = sf::Transform::Identity;
 //    t.translate(sf::Vector2f(origin));
-//    t.scale(1.5, 1.5);
+//    t.scale(2,2);
 //    t.translate(-sf::Vector2f(origin));
+//    t.translate(100, 0);
+
 //    t.translate((float)100/(float)1.5, 0);
 
     sf::Clock clock;
@@ -108,6 +112,9 @@ int main() {
                 if (event.key.code == sf::Keyboard::W){
                     lineThickness += 0.5;
                 }
+                if (event.key.code == sf::Keyboard::T){
+                    tracking = !tracking;
+                }
             }
             // sf::Event::MouseMoved
         }
@@ -116,7 +123,7 @@ int main() {
         if (clicking){
             v.setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
             sig.addPoint(v.getAbsoluteMousePos());
-//            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y));
+//            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin);
 //            std::cout << "add point " << Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin << std::endl;
         }
 
@@ -154,6 +161,14 @@ int main() {
             for (size_t i=0; i<cycles.size() && i < maxCoef; i++){
                 cycles[i].update(clock.getElapsedTime(), pos);
                 pos = cycles[i].getEndPoint();
+            }
+
+            if (tracking){
+                v.setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
+                v.setZoom(5);
+            }else{
+                v.setCenter(sf::Vector2f(0,0)); // center relative to origin
+                v.setZoom(1);
             }
 
             m_path.push_back(sf::Vector2f(pos));
