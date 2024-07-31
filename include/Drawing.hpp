@@ -3,8 +3,11 @@
 #include <Consts.hpp>
 #include <Point.hpp>
 #include <Lines.hpp>
+#include <ViewportHandler.hpp>
 
 struct Cycloid {
+
+    ViewportHandler* vdraw = ViewportHandler::getInstance();
 
     Cycloid(float rad, Point pos, const int phi, float phase) {
         m_radius = rad;
@@ -18,7 +21,7 @@ struct Cycloid {
         trace.setPosition(sf::Vector2f(pos + Point(-rad, -rad)));
         trace.setFillColor(sf::Color::Transparent);
         trace.setOutlineColor(sf::Color::White);
-        trace.setOutlineThickness(1);
+        trace.setOutlineThickness(1/vdraw->getZoom());
 
 //        line = sfLine(pos, getEndPoint(), sf::Color::White, 1);
         arrow.setPrimitiveType(sf::Lines);
@@ -74,6 +77,8 @@ struct Cycloid {
     void update(sf::Time t, Point pos){
         setPosition(pos);
         trace.setPosition(sf::Vector2f(pos + Point(-m_radius, -m_radius)));
+
+        trace.setOutlineThickness(1/vdraw->getZoom());
 
 //        line = sfLine(pos, getEndPoint(), sf::Color::White, 1);
         long long ms = t.asMilliseconds() * speedMulti;

@@ -92,3 +92,19 @@ double dist(const Point &p1, const Point &p2){
     return sqrt(dx*dx + dy*dy);
 }
 
+double dist(const sf::Vector2f &p1, const sf::Vector2f &p2){
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return sqrt(dx*dx + dy*dy);
+}
+
+double dist(const sf::Vector2f &p1, const Point &p2){
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return sqrt(dx*dx + dy*dy);
+}
+double dist(const Point &p1, const sf::Vector2f &p2){
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return sqrt(dx*dx + dy*dy);
+}

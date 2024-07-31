@@ -16,10 +16,12 @@ bool drawing = false;
 
 
 int maxCoef = 10;
+int maxPoints = 110;
 //int fadingLength = 300; // number of points that fade
 //float stoppingPercentage = 0.95; // percentage of one rotation untill path disapperas
-float lineThickness = 3;
+float lineThickness = 1.5;
 
+ViewportHandler* ViewportHandler ::instancePtr = NULL;
 
 std::chrono::high_resolution_clock::time_point start;
 std::chrono::high_resolution_clock::time_point end;
@@ -48,8 +50,9 @@ int main() {
     {
         throw "Can't load font!";
     }
-
-    ViewportHandler v(sf::Vector2f(window.getSize()));
+    ViewportHandler* v = ViewportHandler::getInstance();
+    v -> setState(sf::Vector2f(window.getSize()));
+//    ViewportHandler v(sf::Vector2f(window.getSize()));
     std::deque<sf::Vector2f> m_path; // point, time
 //    sf::Vector2f origin(window.getSize().x/2, window.getSize().y/2);
 //    sf::Transform t = sf::Transform::Identity;
@@ -86,9 +89,18 @@ int main() {
             if (event.type == sf::Event::MouseButtonReleased && clicking){
                 clicking = false;
             }
+            if (event.type == sf::Event::MouseWheelMoved)
+            {
+                if (abs(event.mouseWheel.delta) >= 1){
+                    std::cout << "wheel movement: " << event.mouseWheel.delta << std::endl;
+                    std::cout << "mouse x: " << event.mouseWheel.x << std::endl;
+                    std::cout << "mouse y: " << event.mouseWheel.y << std::endl;
+                }
+
+            }
             if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::C){
-                    compute(Point(v.getOrigin()));
+                    compute(Point(v -> getOrigin()));
                     m_path.clear();
 //                    std::cout << "computed " << cycles[0] << std::endl;
                 }
@@ -99,11 +111,11 @@ int main() {
                     maxCoef++;
                 }
                 if (event.key.code == sf::Keyboard::Z){
-                    speedMulti -= 0.05;
+                    speedMulti -= 0.02;
                     m_path.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::X){
-                    speedMulti += 0.05;
+                    speedMulti += 0.02;
                     m_path.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::Q){
@@ -112,7 +124,7 @@ int main() {
                 if (event.key.code == sf::Keyboard::W){
                     lineThickness += 0.5;
                 }
-                if (event.key.code == sf::Keyboard::T){
+                if (event.key.code == sf::Keyboard::Space){
                     tracking = !tracking;
                 }
             }
@@ -121,8 +133,8 @@ int main() {
 
 
         if (clicking){
-            v.setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
-            sig.addPoint(v.getAbsoluteMousePos());
+            v -> setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
+            sig.addPoint(v -> getAbsoluteMousePos());
 //            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin);
 //            std::cout << "add point " << Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin << std::endl;
         }
@@ -133,13 +145,14 @@ int main() {
         std::vector<sf::Text> texts;
         sf::Text computeFourier("Compute epicycles (C)", font, 15);
         sf::Text epicycleNumText("Number of epicycles (S: -1, D: +1): " + std::to_string(maxCoef), font, 15);
-        sf::Text speedMultiText("Speed multiplier (Z: -0.05, X: +0.05): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
+        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
         sf::Text traceThickness("Trace Thickness (Q: -0.5, W: +0.5): " + std::to_string(lineThickness).substr(0, 4), font, 15);
 
         texts.push_back(computeFourier);
         texts.push_back(epicycleNumText);
         texts.push_back(speedMultiText);
         texts.push_back(traceThickness);
+
 
         for (int i=0; i<texts.size(); i++){
             texts[i].setFillColor(sf::Color::White);
@@ -164,25 +177,33 @@ int main() {
             }
 
             if (tracking){
-                v.setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
-                v.setZoom(5);
+                v -> setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
+                v -> setZoom(5);
             }else{
-                v.setCenter(sf::Vector2f(0,0)); // center relative to origin
-                v.setZoom(1);
+                v -> setCenter(sf::Vector2f(0,0)); // center relative to origin
+                v -> setZoom(1);
+            }
+
+//            while (m_path.size() > 0 && ((m_path.back().second  cycles[0].getAngle()) <= 30)){
+//                m_path.pop_back();
+//            }
+            while (m_path.size() > (double)maxPoints/speedMulti){
+                m_path.pop_front();
             }
 
             m_path.push_back(sf::Vector2f(pos));
 
+
             for (size_t i=1; i<m_path.size(); ++i){
-                sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness);
+                sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness/v->getZoom());
                 sf::RenderStates r;
-                r.transform = v.getTransform();
+                r.transform = v -> getTransform();
                 l.draw(window, r);
             }
 
             for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
                 sf::RenderStates r;
-                r.transform = v.getTransform();
+                r.transform = v -> getTransform();
                 cycles[i].draw(window, r);
             }
         }

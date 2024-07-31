@@ -12,6 +12,8 @@ struct ViewState{
 
     sf::Transform t;
 
+    ViewState(){}
+
     ViewState(sf::Vector2f viewSize, const float z = (float)1) : origin(viewSize.x * 0.5f, viewSize.y * 0.5f), zoom(z), center(sf::Vector2f(0,0))
     {}
 
@@ -31,48 +33,73 @@ struct ViewState{
     }
 };
 
-struct ViewportHandler{
+class ViewportHandler{
+private:
+    static ViewportHandler* instancePtr;
+
+public:
     ViewState state;
 
-    ViewportHandler(sf::Vector2f viewSize): state(viewSize)
-    {
-        state.update();
+    ViewportHandler(){}
+
+    ViewportHandler(const ViewportHandler& obj)=delete;
+
+    static ViewportHandler* getInstance(){
+        if (instancePtr == NULL){
+            instancePtr = new ViewportHandler();
+            return instancePtr;
+        }else{
+            return instancePtr;
+        }
+    }
+
+//    ViewportHandler(sf::Vector2f viewSize): state(viewSize)
+//    {
+//        state.update();
+//    }
+    void setState(sf::Vector2f viewSize){
+        this->state = ViewState(viewSize);
+        this->state.update();
     }
 
     void setZoom(float z){
-        state.zoom = z;
-        state.update();
+        this->state.zoom = z;
+        this->state.update();
     }
 
     void setCenter(sf::Vector2f off){
-        state.center = off;
-        state.update();
+        this->state.center = off;
+        this->state.update();
     }
 
     void setOrigin(sf::Vector2f org){
-        state.origin = org;
-        state.update();
+        this->state.origin = org;
+        this->state.update();
     }
 
     void setMouse(sf::Vector2f m){
-        state.updateMouse(m);
+        this->state.updateMouse(m);
     }
 
     sf::Vector2f getAbsoluteMousePos(){
-        return state.mouseAbsPos;
+        return this->state.mouseAbsPos;
     }
 
     void reset(){
-        state.zoom = 1.0f;
-        state.center = sf::Vector2f(0,0);
-        state.update();
+        this->state.zoom = 1.0f;
+        this->state.center = sf::Vector2f(0,0);
+        this->state.update();
     }
 
     sf::Transform getTransform(){
-        return state.t;
+        return this->state.t;
     }
 
     sf::Vector2f getOrigin(){
-        return state.origin;
+        return this->state.origin;
+    }
+
+    float getZoom(){
+        return this->state.zoom;
     }
 };
