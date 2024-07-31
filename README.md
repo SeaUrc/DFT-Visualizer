@@ -6,5 +6,7 @@ Program that takes in points (drawn by a user) and computes its discrete Fourier
 - C : clear drawing
 - X : increase drawing speed
 - Z : decrease drawing speed
+- A : remove epicycle
+- S : add epicycle
 - T : track point
 - Scroll : zoom in/out
