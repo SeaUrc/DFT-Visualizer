@@ -13,6 +13,8 @@ struct Consts{
 
     static const int secToMilli = 1000;
 
+    constexpr static const float minZoom = 0.1;
+
 };
 
 

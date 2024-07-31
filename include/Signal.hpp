@@ -22,17 +22,15 @@ public:
         return res;
     }
 
+    void clear(){
+        points.clear();
+    }
+
     Signal(){
 
     }
 
 private:
     std::vector<Point> points;
-    std::vector<Point> normalized;
-//    std::vector<double> dist;
-//
-//    double tot;
-//
-//    void
 
 };

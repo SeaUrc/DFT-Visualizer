@@ -23,7 +23,6 @@ struct Cycloid {
         trace.setOutlineColor(sf::Color::White);
         trace.setOutlineThickness(1/vdraw->getZoom());
 
-//        line = sfLine(pos, getEndPoint(), sf::Color::White, 1);
         arrow.setPrimitiveType(sf::Lines);
         generateArrow(pos, getEndPoint());
 
@@ -80,24 +79,15 @@ struct Cycloid {
 
         trace.setOutlineThickness(1/vdraw->getZoom());
 
-//        line = sfLine(pos, getEndPoint(), sf::Color::White, 1);
         long long ms = t.asMilliseconds() * speedMulti;
         ms %= (long long)Consts::secToMilli * m_phi;
         m_angle = ((double)ms / (double)Consts::secToMilli * m_phi) * 2 * Consts::PI + m_phase;
         generateArrow(m_position, getEndPoint());
     }
 
-    void debug(){
-        std::cout << "DEBUG" << std::endl;
-        for (int i=0; i<arrow.getVertexCount(); i++){
-            std::cout << arrow[i].position.x << ' ' << arrow[i].position.y << std::endl;
-        }
-    }
-
     void draw(sf::RenderWindow &window, sf::RenderStates &r){
 
         window.draw(arrow, r);
-//        line.draw(window, sf::RenderStates());
         window.draw(trace, r);
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <Consts.hpp>
 
 struct ViewState{
     sf::Vector2f origin;
@@ -20,7 +21,6 @@ struct ViewState{
     void update(){
         t = sf::Transform::Identity;
         t.translate(origin);
-//        t.translate(-center*zoom);
         t.scale(zoom, zoom);
         t.translate(-origin);
         t.translate(-center);
@@ -53,16 +53,15 @@ public:
         }
     }
 
-//    ViewportHandler(sf::Vector2f viewSize): state(viewSize)
-//    {
-//        state.update();
-//    }
     void setState(sf::Vector2f viewSize){
         this->state = ViewState(viewSize);
         this->state.update();
     }
 
     void setZoom(float z){
+        if (z < Consts::minZoom){
+            return;
+        }
         this->state.zoom = z;
         this->state.update();
     }

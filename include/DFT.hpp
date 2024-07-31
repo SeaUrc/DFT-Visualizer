@@ -57,16 +57,8 @@ class Fourier {
             std::vector<Cycloid> epicycles;
             Point prevPoint = origin;
             for (int i=0; i<N; i++){
-//                std::cout << dftRes.size() << std::endl;
-//                for (double x : dftRes[0]){
-//                    std::cout << x << std::endl;
-//                }
-//                if (dftRes[i][3] > 1e-30){
                 epicycles.push_back(Cycloid(dftRes[i][3], ((prevPoint)) , (dftRes[i][2] > N/2 ? dftRes[i][2]-N : dftRes[i][2]), dftRes[i][4]));
-                std::cout << epicycles[i];
                 prevPoint = epicycles[i].getEndPoint();
-                std::cout << " endpoint " << epicycles[i].getEndPoint() << std::endl;
-//                }
             }
             return epicycles;
         }

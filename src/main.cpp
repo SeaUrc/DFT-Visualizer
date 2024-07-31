@@ -22,9 +22,11 @@ int maxPoints = 110;
 float lineThickness = 1.5;
 
 ViewportHandler* ViewportHandler ::instancePtr = NULL;
+ViewportHandler* v = ViewportHandler::getInstance();
 
 std::chrono::high_resolution_clock::time_point start;
 std::chrono::high_resolution_clock::time_point end;
+
 double fps = -1.0;
 
 bool tracking = false;
@@ -33,6 +35,7 @@ bool tracking = false;
 void compute(Point origin){
     std::vector<complex> points = sig.getComplex();
     reverse(points.begin(), points.end());
+
     Fourier f = Fourier(points, origin);
     f.DFT();
     f.sortRes();
@@ -45,32 +48,27 @@ void compute(Point origin){
 int main() {
     sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors");
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
+
     sf::Font font;
     if (!font.loadFromFile("../font/font.ttf"))
     {
         throw "Can't load font!";
     }
-    ViewportHandler* v = ViewportHandler::getInstance();
-    v -> setState(sf::Vector2f(window.getSize()));
-//    ViewportHandler v(sf::Vector2f(window.getSize()));
-    std::deque<sf::Vector2f> m_path; // point, time
-//    sf::Vector2f origin(window.getSize().x/2, window.getSize().y/2);
-//    sf::Transform t = sf::Transform::Identity;
-//    t.translate(sf::Vector2f(origin));
-//    t.scale(2,2);
-//    t.translate(-sf::Vector2f(origin));
-//    t.translate(100, 0);
 
-//    t.translate((float)100/(float)1.5, 0);
+    v -> setState(sf::Vector2f(window.getSize()));
+
+    std::deque<sf::Vector2f> epicyclePath;
+    std::vector<std::vector<sf::Vector2f>> userPaths;
 
     sf::Clock clock;
+
     bool clicking = false;
+
     while (window.isOpen())
     {
         sf::Event event;
 
         start = std::chrono::high_resolution_clock::now();
-
 
         while (window.pollEvent(event))
         {
@@ -91,67 +89,78 @@ int main() {
             }
             if (event.type == sf::Event::MouseWheelMoved)
             {
-                if (abs(event.mouseWheel.delta) >= 1){
-                    std::cout << "wheel movement: " << event.mouseWheel.delta << std::endl;
-                    std::cout << "mouse x: " << event.mouseWheel.x << std::endl;
-                    std::cout << "mouse y: " << event.mouseWheel.y << std::endl;
+                if (abs(event.mouseWheel.delta) >= 1 && tracking){
+                    v -> setZoom( v->getZoom() + event.mouseWheel.delta*0.1);
                 }
-
             }
             if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::C){
-                    compute(Point(v -> getOrigin()));
-                    m_path.clear();
-//                    std::cout << "computed " << cycles[0] << std::endl;
-                }
-                if (event.key.code == sf::Keyboard::S){
-                    maxCoef--;
+                    epicyclePath.clear();
+                    userPaths.clear();
+                    cycles.clear();
+                    sig.clear();
+                    drawing = false;
+                    tracking = false;
+                    v -> setCenter(sf::Vector2f(0,0)); // center relative to origin
+                    v -> setZoom(1);
                 }
                 if (event.key.code == sf::Keyboard::D){
+                    compute(Point(v -> getOrigin()));
+                    epicyclePath.clear();
+                }
+                if (event.key.code == sf::Keyboard::A){
+                    maxCoef--;
+                }
+                if (event.key.code == sf::Keyboard::S){
                     maxCoef++;
                 }
                 if (event.key.code == sf::Keyboard::Z){
                     speedMulti -= 0.02;
-                    m_path.clear(); // prevent jumping
+                    epicyclePath.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::X){
                     speedMulti += 0.02;
-                    m_path.clear(); // prevent jumping
+                    epicyclePath.clear(); // prevent jumping
                 }
-                if (event.key.code == sf::Keyboard::Q){
-                    lineThickness -= 0.5;
-                }
-                if (event.key.code == sf::Keyboard::W){
-                    lineThickness += 0.5;
-                }
-                if (event.key.code == sf::Keyboard::Space){
+                if (event.key.code == sf::Keyboard::T){
                     tracking = !tracking;
                 }
             }
-            // sf::Event::MouseMoved
         }
 
+        if (!clicking){
+            if (userPaths.size() == 0){
+                userPaths.push_back(std::vector<sf::Vector2f>());
+            }
+            if (userPaths.back().size() > 0){
+                userPaths.push_back(std::vector<sf::Vector2f>());
+            }
+        }
 
         if (clicking){
             v -> setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
             sig.addPoint(v -> getAbsoluteMousePos());
-//            sig.addPoint(Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin);
-//            std::cout << "add point " << Point(sf::Mouse::getPosition(window).x,sf::Mouse::getPosition(window).y) - origin << std::endl;
+            if (userPaths.size()){
+                userPaths.back().push_back(sf::Vector2f(sf::Mouse::getPosition(window)));
+            }
+
         }
 
         window.clear(sf::Color::Black);
 
-        /*   Text  */
+        /*------Text------*/
         std::vector<sf::Text> texts;
-        sf::Text computeFourier("Compute epicycles (C)", font, 15);
-        sf::Text epicycleNumText("Number of epicycles (S: -1, D: +1): " + std::to_string(maxCoef), font, 15);
+        sf::Text computeFourier("Compute epicycles (D)", font, 15);
+        sf::Text clearText("Clear text (C)", font, 15);
+        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
         sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
-        sf::Text traceThickness("Trace Thickness (Q: -0.5, W: +0.5): " + std::to_string(lineThickness).substr(0, 4), font, 15);
+        sf::Text msg("Dropdown in progress", font, 15);
 
         texts.push_back(computeFourier);
+        texts.push_back(clearText);
         texts.push_back(epicycleNumText);
         texts.push_back(speedMultiText);
-        texts.push_back(traceThickness);
+        texts.push_back(msg);
 
 
         for (int i=0; i<texts.size(); i++){
@@ -160,42 +169,52 @@ int main() {
             window.draw(texts[i]);
         }
 
-        /* FPS */
+        /*------FPS------*/
         sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
         fpsText.setFillColor(sf::Color::White);
         fpsText.setPosition(window.getSize().x-100, 10);
         window.draw(fpsText);
 
 
-        /*   Drawing Epicycles   */
+
+        /*------Drawing User Path------*/
+        for (std::vector<sf::Vector2f> &userP : userPaths){
+            sf::RenderStates r;
+            r.transform = v -> getTransform();
+            if (userP.size() < 2){
+                continue;
+            }
+            for (size_t i=1; i<userP.size(); ++i){
+                sfLine l(userP[i-1], userP[i], sf::Color::Red, lineThickness/v->getZoom());
+                l.draw(window, r);
+            }
+        }
+
+        /*------Drawing Epicycles------*/
         if (drawing){
             Point pos = cycles[0].getPos();
 
-            for (size_t i=0; i<cycles.size() && i < maxCoef; i++){
+            for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
                 cycles[i].update(clock.getElapsedTime(), pos);
                 pos = cycles[i].getEndPoint();
             }
 
             if (tracking){
                 v -> setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
-                v -> setZoom(5);
             }else{
                 v -> setCenter(sf::Vector2f(0,0)); // center relative to origin
                 v -> setZoom(1);
             }
 
-//            while (m_path.size() > 0 && ((m_path.back().second  cycles[0].getAngle()) <= 30)){
-//                m_path.pop_back();
-//            }
-            while (m_path.size() > (double)maxPoints/speedMulti){
-                m_path.pop_front();
+            while (epicyclePath.size() > (double)maxPoints/speedMulti){
+                epicyclePath.pop_front();
             }
 
-            m_path.push_back(sf::Vector2f(pos));
+            epicyclePath.push_back(sf::Vector2f(pos));
 
 
-            for (size_t i=1; i<m_path.size(); ++i){
-                sfLine l(m_path[i-1], m_path[i], sf::Color::Blue, lineThickness/v->getZoom());
+            for (size_t i=1; i<epicyclePath.size(); ++i){
+                sfLine l(epicyclePath[i-1], epicyclePath[i], sf::Color::Blue, lineThickness/v->getZoom());
                 sf::RenderStates r;
                 r.transform = v -> getTransform();
                 l.draw(window, r);
