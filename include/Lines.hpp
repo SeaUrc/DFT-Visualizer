@@ -23,8 +23,8 @@ public:
         vertices[2].position = point2 - offset;
         vertices[3].position = point1 - offset;
 
-        for (int i=0; i<4; ++i)
-            vertices[i].color = color;
+        for (auto & vertice : vertices)
+            vertice.color = color;
     }
 
     sfLine(const sf::Vector2f& point1, const sf::Vector2f& point2, const sf::Color col, float thick):
@@ -41,8 +41,8 @@ public:
         vertices[2].position = point2 - offset;
         vertices[3].position = point1 - offset;
 
-        for (int i=0; i<4; ++i)
-            vertices[i].color = color;
+        for (auto & vertice : vertices)
+            vertice.color = color;
     }
 
     void setThickness(float thick){

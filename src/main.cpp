@@ -1,4 +1,3 @@
-#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <Drawing.hpp>
 #include <Consts.hpp>
@@ -6,31 +5,30 @@
 #include <Signal.hpp>
 #include <Lines.hpp>
 #include <ViewportHandler.hpp>
+#include <Menu.hpp>
+
+#include <iostream>
 #include <deque>
-
-std::vector<Cycloid> cycles;
-Signal sig = Signal();
-bool drawing = false;
-
-//double speedMulti;
-
 
 int maxCoef = 10;
 int maxPoints = 110;
-//int fadingLength = 300; // number of points that fade
-//float stoppingPercentage = 0.95; // percentage of one rotation untill path disapperas
 float lineThickness = 1.5;
 
-ViewportHandler* ViewportHandler ::instancePtr = NULL;
+bool clicking = false;
+bool tracking = false;
+bool drawing = false;
+
+std::vector<Cycloid> cycles;
+Signal sig = Signal();
+std::deque<sf::Vector2f> epicyclePath;
+std::vector<std::vector<sf::Vector2f>> userPaths;
+
+ViewportHandler* ViewportHandler ::instancePtr = nullptr;
 ViewportHandler* v = ViewportHandler::getInstance();
 
 std::chrono::high_resolution_clock::time_point start;
 std::chrono::high_resolution_clock::time_point end;
-
 double fps = -1.0;
-
-bool tracking = false;
-
 
 void compute(Point origin){
     std::vector<complex> points = sig.getComplex();
@@ -47,22 +45,20 @@ void compute(Point origin){
 
 int main() {
     sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors");
+//    sf::RenderWindow window(sf::VideoMode(2880, 1800), "DFT Visualizer");
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
 
     sf::Font font;
     if (!font.loadFromFile("../font/font.ttf"))
     {
-        throw "Can't load font!";
+        throw std::invalid_argument("Can't load font!");
     }
 
     v -> setState(sf::Vector2f(window.getSize()));
 
-    std::deque<sf::Vector2f> epicyclePath;
-    std::vector<std::vector<sf::Vector2f>> userPaths;
-
     sf::Clock clock;
 
-    bool clicking = false;
+    Menu m(sf::Vector2f(50, 50));
 
     while (window.isOpen())
     {
@@ -149,25 +145,29 @@ int main() {
         window.clear(sf::Color::Black);
 
         /*------Text------*/
-        std::vector<sf::Text> texts;
-        sf::Text computeFourier("Compute epicycles (D)", font, 15);
-        sf::Text clearText("Clear text (C)", font, 15);
-        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
-        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
-        sf::Text msg("Dropdown in progress", font, 15);
+//        std::vector<sf::Text> texts;
+//        sf::Text computeFourier("Compute epicycles (D)", font, 15);
+//        sf::Text clearText("Clear text (C)", font, 15);
+//        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
+//        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
+//        sf::Text msg("Dropdown in progress", font, 15);
+//
+//        texts.push_back(computeFourier);
+//        texts.push_back(clearText);
+//        texts.push_back(epicycleNumText);
+//        texts.push_back(speedMultiText);
+//        texts.push_back(msg);
+//
+//
+//        for (int i=0; i<texts.size(); i++){
+//            texts[i].setFillColor(sf::Color::White);
+//            texts[i].setPosition(10.0f, 10.0f + 25.0f*(float)i);
+//            window.draw(texts[i]);
+//        }
 
-        texts.push_back(computeFourier);
-        texts.push_back(clearText);
-        texts.push_back(epicycleNumText);
-        texts.push_back(speedMultiText);
-        texts.push_back(msg);
+        /*------Menu------*/
 
-
-        for (int i=0; i<texts.size(); i++){
-            texts[i].setFillColor(sf::Color::White);
-            texts[i].setPosition(10, 10 + 25*i);
-            window.draw(texts[i]);
-        }
+        m.draw(window, sf::RenderStates());
 
         /*------FPS------*/
         sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
@@ -212,7 +212,6 @@ int main() {
 
             epicyclePath.push_back(sf::Vector2f(pos));
 
-
             for (size_t i=1; i<epicyclePath.size(); ++i){
                 sfLine l(epicyclePath[i-1], epicyclePath[i], sf::Color::Blue, lineThickness/v->getZoom());
                 sf::RenderStates r;
@@ -228,10 +227,10 @@ int main() {
         }
 
         end = std::chrono::high_resolution_clock::now();
-        fps = (double)1e9/(double)std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
-
+        fps = (fps*4.0f +(double)1e9/(double)std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/5.0f; // weighted avg
 
         window.display();
+
 
     }
 
