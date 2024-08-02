@@ -5,7 +5,6 @@
 #include <Signal.hpp>
 #include <Lines.hpp>
 #include <ViewportHandler.hpp>
-#include <Menu.hpp>
 
 #include <iostream>
 #include <deque>
@@ -36,8 +35,9 @@ void compute(Point origin){
 
     Fourier f = Fourier(points, origin);
     f.DFT();
-    f.sortRes();
+//    f.sortRes();
     cycles = f.constructEpicycles();
+    Fourier::sortByFreq(cycles);
     if (!cycles.empty()){
         drawing = true;
     }
@@ -45,7 +45,6 @@ void compute(Point origin){
 
 int main() {
     sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors");
-//    sf::RenderWindow window(sf::VideoMode(2880, 1800), "DFT Visualizer");
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
 
     sf::Font font;
@@ -58,7 +57,6 @@ int main() {
 
     sf::Clock clock;
 
-    Menu m(sf::Vector2f(50, 50));
 
     while (window.isOpen())
     {
@@ -125,19 +123,19 @@ int main() {
         }
 
         if (!clicking){
-            if (userPaths.size() == 0){
-                userPaths.push_back(std::vector<sf::Vector2f>());
+            if (userPaths.empty()){
+                userPaths.emplace_back();
             }
-            if (userPaths.back().size() > 0){
-                userPaths.push_back(std::vector<sf::Vector2f>());
+            if (!userPaths.back().empty()){
+                userPaths.emplace_back();
             }
         }
 
         if (clicking){
             v -> setMouse(sf::Vector2f(sf::Mouse::getPosition(window)));
             sig.addPoint(v -> getAbsoluteMousePos());
-            if (userPaths.size()){
-                userPaths.back().push_back(sf::Vector2f(sf::Mouse::getPosition(window)));
+            if (!userPaths.empty()){
+                userPaths.back().emplace_back(sf::Mouse::getPosition(window));
             }
 
         }
@@ -145,29 +143,29 @@ int main() {
         window.clear(sf::Color::Black);
 
         /*------Text------*/
-//        std::vector<sf::Text> texts;
-//        sf::Text computeFourier("Compute epicycles (D)", font, 15);
-//        sf::Text clearText("Clear text (C)", font, 15);
-//        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
-//        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
-//        sf::Text msg("Dropdown in progress", font, 15);
-//
-//        texts.push_back(computeFourier);
-//        texts.push_back(clearText);
-//        texts.push_back(epicycleNumText);
-//        texts.push_back(speedMultiText);
-//        texts.push_back(msg);
-//
-//
-//        for (int i=0; i<texts.size(); i++){
-//            texts[i].setFillColor(sf::Color::White);
-//            texts[i].setPosition(10.0f, 10.0f + 25.0f*(float)i);
-//            window.draw(texts[i]);
-//        }
+        std::vector<sf::Text> texts;
+        sf::Text computeFourier("Compute epicycles (D)", font, 15);
+        sf::Text clearText("Clear text (C)", font, 15);
+        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
+        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
+        sf::Text trackText("Camera track (T)", font, 15);
+        sf::Text zoomText("Zoom (scroll wheel, only when tracking): " + std::to_string(v->getZoom()).substr(0, 3), font, 15);
 
-        /*------Menu------*/
 
-        m.draw(window, sf::RenderStates());
+        texts.push_back(computeFourier);
+        texts.push_back(clearText);
+        texts.push_back(epicycleNumText);
+        texts.push_back(speedMultiText);
+        texts.push_back(zoomText);
+        texts.push_back(trackText);
+
+
+        for (int i=0; i<texts.size(); i++){
+            texts[i].setFillColor(sf::Color::White);
+            texts[i].setPosition(10.0f, 10.0f + 25.0f*(float)i);
+            window.draw(texts[i]);
+        }
+
 
         /*------FPS------*/
         sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
@@ -192,11 +190,16 @@ int main() {
 
         /*------Drawing Epicycles------*/
         if (drawing){
-            Point pos = cycles[0].getPos();
+            std::vector<Cycloid> cyclesDrawn;
+            for (size_t i=0; i<cycles.size() && i<maxCoef; ++i){
+                cyclesDrawn.push_back(cycles[i]);
+            }
+            Fourier::sortByRadius(cyclesDrawn);
 
-            for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
-                cycles[i].update(clock.getElapsedTime(), pos);
-                pos = cycles[i].getEndPoint();
+            Point pos = cyclesDrawn[0].getPos();
+            for (size_t i=0; i<cyclesDrawn.size(); ++i){
+                cyclesDrawn[i].update(clock.getElapsedTime(), pos);
+                pos = cyclesDrawn[i].getEndPoint();
             }
 
             if (tracking){
@@ -219,10 +222,10 @@ int main() {
                 l.draw(window, r);
             }
 
-            for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
+            for (size_t i=0; i<cyclesDrawn.size() && i < maxCoef; ++i){
                 sf::RenderStates r;
                 r.transform = v -> getTransform();
-                cycles[i].draw(window, r);
+                cyclesDrawn[i].draw(window, r);
             }
         }
 
