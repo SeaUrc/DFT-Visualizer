@@ -35,8 +35,9 @@ void compute(Point origin){
 
     Fourier f = Fourier(points, origin);
     f.DFT();
-    f.sortRes();
+//    f.sortRes();
     cycles = f.constructEpicycles();
+    Fourier::sortByFrequency(cycles);
     if (!cycles.empty()){
         drawing = true;
     }
@@ -83,7 +84,7 @@ int main() {
             if (event.type == sf::Event::MouseWheelMoved)
             {
                 if (abs(event.mouseWheel.delta) >= 1 && tracking){
-                    v -> setZoom( v->getZoom() + event.mouseWheel.delta*0.1);
+                    v -> setZoom( v->getZoom() / pow(.95, event.mouseWheel.delta*0.1));
                 }
             }
             if (event.type == sf::Event::KeyPressed){
@@ -108,11 +109,11 @@ int main() {
                     maxCoef++;
                 }
                 if (event.key.code == sf::Keyboard::Z){
-                    speedMulti -= 0.02;
+                    speedMulti *= 0.95;
                     epicyclePath.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::X){
-                    speedMulti += 0.02;
+                    speedMulti /= 0.95;
                     epicyclePath.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::T){
@@ -146,7 +147,7 @@ int main() {
         sf::Text computeFourier("Compute epicycles (D)", font, 15);
         sf::Text clearText("Clear text (C)", font, 15);
         sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
-        sf::Text speedMultiText("Speed multiplier (Z: -0.02, X: +0.02): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
+        sf::Text speedMultiText("Speed multiplier (Z: *0.95, X: /0.95): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
         sf::Text trackText("Camera track (T)", font, 15);
         sf::Text zoomText("Zoom (scroll wheel, only when tracking): " + std::to_string(v->getZoom()).substr(0, 3), font, 15);
         
@@ -189,11 +190,18 @@ int main() {
 
         /*------Drawing Epicycles------*/
         if (drawing){
-            Point pos = cycles[0].getPos();
-
+            std::vector<Cycloid> radiusSortedEpicycles;
             for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
-                cycles[i].update(clock.getElapsedTime(), pos);
-                pos = cycles[i].getEndPoint();
+                radiusSortedEpicycles.push_back(cycles[i]);
+            }
+//            Fourier::sortByRadius(radiusSortedEpicycles);
+//            sort(radiusSortedEpicycles.begin(), radiusSortedEpicycles.end(), Fourier::cmpRadius);
+
+            Point pos = radiusSortedEpicycles[0].getPos();
+
+            for (size_t i=0; i<radiusSortedEpicycles.size(); ++i){
+                radiusSortedEpicycles[i].update(clock.getElapsedTime(), pos);
+                pos = radiusSortedEpicycles[i].getEndPoint();
             }
 
             if (tracking){
@@ -216,10 +224,11 @@ int main() {
                 l.draw(window, r);
             }
 
-            for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
+            for (size_t i=0; i<radiusSortedEpicycles.size() && i < maxCoef; ++i){
+                std::cout << radiusSortedEpicycles[i] << std::endl;
                 sf::RenderStates r;
                 r.transform = v -> getTransform();
-                cycles[i].draw(window, r);
+                radiusSortedEpicycles[i].draw(window, r);
             }
         }
 
