@@ -40,19 +40,19 @@ struct Cycloid {
         return m_position;
     }
 
-    float getRadius() const{
+    float getRadius(){
         return m_radius;
     }
 
-    float getAngle() const{
+    float getAngle(){
         return m_angle;
     }
 
-    float getFreq() const{
+    float getFreq(){
         return m_phi;
     }
 
-    Point getEndPoint() const{
+    Point getEndPoint(){
         return Point(m_position.x + cos(m_angle) * m_radius, m_position.y + sin(m_angle) * m_radius);
     }
 
