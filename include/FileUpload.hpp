@@ -37,12 +37,14 @@ std::vector<Point> extractPointsFromSVG(const char* svgFile) {
     for (tinyxml2::XMLElement* element = svgRoot->FirstChildElement(); element != nullptr; element = element->NextSiblingElement()) {
         const char* tagName = element->Name();
         if (std::string(tagName) == "circle") {
+            std::cout << "Add circle!" << std::endl;
             float cx = element->FloatAttribute("cx");
             float cy = element->FloatAttribute("cy");
             float r = element->FloatAttribute("r");
             std::vector<Point> circlePoints = sampleCircle(cx, cy, r);
             points.insert(points.end(), circlePoints.begin(), circlePoints.end());
         } else if (std::string(tagName) == "ellipse") {
+            std::cout << "Add ellipse!" << std::endl;
             float cx = element->FloatAttribute("cx");
             float cy = element->FloatAttribute("cy");
             float rx = element->FloatAttribute("rx");
@@ -50,6 +52,7 @@ std::vector<Point> extractPointsFromSVG(const char* svgFile) {
             std::vector<Point> ellipsePoints = sampleEllipse(cx, cy, rx, ry);
             points.insert(points.end(), ellipsePoints.begin(), ellipsePoints.end());
         } else if (std::string(tagName) == "rect") {
+            std::cout << "Add rectangle!" << std::endl;
             float x = element->FloatAttribute("x");
             float y = element->FloatAttribute("y");
             float width = element->FloatAttribute("width");
@@ -59,6 +62,7 @@ std::vector<Point> extractPointsFromSVG(const char* svgFile) {
             points.emplace_back(x + width, y + height);
             points.emplace_back(x, y + height);
         } else if (std::string(tagName) == "line") {
+            std::cout << "Add line!" << std::endl;
             float x1 = element->FloatAttribute("x1");
             float y1 = element->FloatAttribute("y1");
             float x2 = element->FloatAttribute("x2");
@@ -66,6 +70,7 @@ std::vector<Point> extractPointsFromSVG(const char* svgFile) {
             points.emplace_back(x1, y1);
             points.emplace_back(x2, y2);
         } else if (std::string(tagName) == "polyline" || std::string(tagName) == "polygon") {
+            std::cout << "Add poly!" << std::endl;
             const char* pointsAttr = element->Attribute("points");
             if (pointsAttr) {
                 std::string pointsStr = pointsAttr;

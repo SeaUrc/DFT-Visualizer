@@ -86,9 +86,12 @@ struct Cycloid {
     }
 
     void draw(sf::RenderWindow &window, sf::RenderStates &r) {
-
         window.draw(arrow, r);
         window.draw(trace, r);
+    }
+
+    void drawWithNoCircles(sf::RenderWindow &window, sf::RenderStates &r) {
+        window.draw(arrow, r);
     }
 
 private:

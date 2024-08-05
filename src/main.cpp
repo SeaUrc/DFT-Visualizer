@@ -5,8 +5,7 @@
 #include <Signal.hpp>
 #include <Lines.hpp>
 #include <ViewportHandler.hpp>
-
-#include <tinyxml2.h>
+#include <FileUpload.hpp>
 
 #include <iostream>
 #include <deque>
@@ -18,6 +17,7 @@ float lineThickness = 1.5;
 bool clicking = false;
 bool tracking = false;
 bool drawing = false;
+bool drawingCircle = true;
 
 std::vector<Cycloid> cycles;
 Signal sig = Signal();
@@ -58,7 +58,12 @@ int main() {
     v -> setState(sf::Vector2f(window.getSize()));
 
     sf::Clock clock;
-
+//
+//    std::vector<Point> test = extractPointsFromSVG("/Users/nick/CLionProjects/DFT/src/test.svg");
+//    for (Point &p : test){
+//        std::cout << p << std::endl;
+//    }
+//    return 0;
 
     while (window.isOpen())
     {
@@ -121,6 +126,9 @@ int main() {
                 if (event.key.code == sf::Keyboard::T){
                     tracking = !tracking;
                 }
+                if (event.key.code == sf::Keyboard::L){
+                    drawingCircle = !drawingCircle;
+                }
             }
         }
 
@@ -139,7 +147,6 @@ int main() {
             if (!userPaths.empty()){
                 userPaths.back().emplace_back(sf::Mouse::getPosition(window));
             }
-
         }
 
         window.clear(sf::Color::Black);
@@ -150,9 +157,9 @@ int main() {
         sf::Text clearText("Clear text (C)", font, 15);
         sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
         sf::Text speedMultiText("Speed multiplier (Z: *0.95, X: /0.95): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
-        sf::Text trackText("Camera track (T)", font, 15);
         sf::Text zoomText("Zoom (scroll wheel, only when tracking): " + std::to_string(v->getZoom()).substr(0, 3), font, 15);
-        
+        sf::Text trackText("Camera track (T)", font, 15);
+        sf::Text showCircle("Toggle circles (L)", font, 15);
 
         texts.push_back(computeFourier);
         texts.push_back(clearText);
@@ -160,6 +167,7 @@ int main() {
         texts.push_back(speedMultiText);
         texts.push_back(zoomText);
         texts.push_back(trackText);
+        texts.push_back(showCircle);
 
 
         for (int i=0; i<texts.size(); i++){
@@ -227,10 +235,15 @@ int main() {
             }
 
             for (size_t i=0; i<radiusSortedEpicycles.size() && i < maxCoef; ++i){
-                std::cout << radiusSortedEpicycles[i] << std::endl;
+
                 sf::RenderStates r;
                 r.transform = v -> getTransform();
-                radiusSortedEpicycles[i].draw(window, r);
+                if (drawingCircle){
+                    radiusSortedEpicycles[i].draw(window, r);
+                }else{
+                    radiusSortedEpicycles[i].drawWithNoCircles(window, r);
+                }
+
             }
         }
 

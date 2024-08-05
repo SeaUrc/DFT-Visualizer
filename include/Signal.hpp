@@ -26,6 +26,14 @@ public:
         points.clear();
     }
 
+    std::vector<sf::Vector2f> getVector2f(){
+        std::vector<sf::Vector2f> res(points.size());
+        for (size_t i=0; i<points.size(); ++i){
+            res[i] = sf::Vector2f(points[i].x, points[i].y);
+        }
+        return res;
+    }
+
     Signal(){
 
     }
