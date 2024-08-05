@@ -6,6 +6,8 @@
 #include <Lines.hpp>
 #include <ViewportHandler.hpp>
 
+#include <tinyxml2.h>
+
 #include <iostream>
 #include <deque>
 
@@ -194,10 +196,10 @@ int main() {
             for (size_t i=0; i<cycles.size() && i < maxCoef; ++i){
                 radiusSortedEpicycles.push_back(cycles[i]);
             }
-//            Fourier::sortByRadius(radiusSortedEpicycles);
-//            sort(radiusSortedEpicycles.begin(), radiusSortedEpicycles.end(), Fourier::cmpRadius);
 
-            Point pos = radiusSortedEpicycles[0].getPos();
+            Fourier::sortByRadius(radiusSortedEpicycles);
+
+            Point pos = v->getOrigin();
 
             for (size_t i=0; i<radiusSortedEpicycles.size(); ++i){
                 radiusSortedEpicycles[i].update(clock.getElapsedTime(), pos);
