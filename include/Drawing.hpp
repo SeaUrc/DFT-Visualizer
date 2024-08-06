@@ -75,13 +75,19 @@ struct Cycloid {
 
     void update(sf::Time t, Point pos) {
         setPosition(pos);
+//        std::cout << "SETPOS" << std::endl;
         trace.setPosition(sf::Vector2f(pos + Point(-m_radius, -m_radius)));
-
         trace.setOutlineThickness(1 / vdraw->getZoom());
+//        std::cout << "SET TRACE" << std::endl;
 
         long long ms = t.asMilliseconds() * speedMulti;
-        ms %= (long long) Consts::secToMilli * m_phi;
-        m_angle = ((double) ms / (double) Consts::secToMilli * m_phi) * 2 * Consts::PI + m_phase;
+//        std::cout << "MS" << std::endl;
+        if (m_phi != 0){
+            ms %= (long long) Consts::secToMilli * m_phi;
+//            std::cout << "MOD" << std::endl;
+            m_angle = ((double) ms / (double) Consts::secToMilli * m_phi) * 2 * Consts::PI + m_phase;
+//            std::cout << "ANGLE" << std::endl;
+        }
         generateArrow(m_position, getEndPoint());
     }
 

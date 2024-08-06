@@ -32,25 +32,31 @@ std::chrono::high_resolution_clock::time_point end;
 double fps = -1.0;
 
 void compute(Point origin){
+//    std::cout << "INSIDE COMPUTE" << std::endl;
     std::vector<complex> points = sig.getComplex();
     reverse(points.begin(), points.end());
-
+//    std::cout << "REVERSE POINTS" << std::endl;
     Fourier f = Fourier(points, origin);
     f.DFT();
+//    std::cout << "DFT" << std::endl;
 //    f.sortRes();
     cycles = f.constructEpicycles();
+//    std::cout << "EPICYCLES" << std::endl;
     Fourier::sortByFrequency(cycles);
+//    std::cout << "SORT" << std::endl;
     if (!cycles.empty()){
         drawing = true;
     }
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors");
+    sf::RenderWindow window(sf::VideoMode().getFullscreenModes()[0], "DFT vectors", sf::Style::Titlebar);
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
-
+//    sf::View view1;
+//    view1.reset(sf::FloatRect(0.0f, 0.0f, 2560.0f, 1600.0f));
+//    window.setView(view1);
     sf::Font font;
-    if (!font.loadFromFile("../font/font.ttf"))
+    if (!font.loadFromFile("/Users/nick/CLionProjects/DFT/font/font.ttf"))
     {
         throw std::invalid_argument("Can't load font!");
     }
@@ -59,11 +65,11 @@ int main() {
 
     sf::Clock clock;
 //
-    std::vector<Point> test = extractPointsFromSVG("/Users/nick/CLionProjects/DFT/src/test.svg");
-    for (Point &p : test){
-        std::cout << p << std::endl;
-    }
-    return 0;
+//    std::vector<Point> test = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
+//    for (Point &p : test){
+//        std::cout << p << std::endl;
+//    }
+//    return 0;
 
     while (window.isOpen())
     {
@@ -106,8 +112,10 @@ int main() {
                     v -> setZoom(1);
                 }
                 if (event.key.code == sf::Keyboard::D){
+//                    std::cout << "D!" << std::endl;
                     compute(Point(v -> getOrigin()));
                     epicyclePath.clear();
+//                    std::cout << "CLEAR!" << std::endl;
                 }
                 if (event.key.code == sf::Keyboard::A){
                     maxCoef--;
@@ -206,13 +214,19 @@ int main() {
             }
 
             Fourier::sortByRadius(radiusSortedEpicycles);
+//            std::cout << "SORTv2" << std::endl;
 
             Point pos = v->getOrigin();
 
             for (size_t i=0; i<radiusSortedEpicycles.size(); ++i){
+//                std::cout << pos << std::endl;
                 radiusSortedEpicycles[i].update(clock.getElapsedTime(), pos);
+//                std::cout << "UPDATE" << std::endl;
                 pos = radiusSortedEpicycles[i].getEndPoint();
+
             }
+
+//            std::cout << "UPDATE" << std::endl;
 
             if (tracking){
                 v -> setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
@@ -225,6 +239,8 @@ int main() {
                 epicyclePath.pop_front();
             }
 
+//            std::cout << "PATH POP" << std::endl;
+
             epicyclePath.push_back(sf::Vector2f(pos));
 
             for (size_t i=1; i<epicyclePath.size(); ++i){
@@ -234,8 +250,9 @@ int main() {
                 l.draw(window, r);
             }
 
-            for (size_t i=0; i<radiusSortedEpicycles.size() && i < maxCoef; ++i){
+//            std::cout << "DRAW PATH" << std::endl;
 
+            for (size_t i=0; i<radiusSortedEpicycles.size() && i < maxCoef; ++i){
                 sf::RenderStates r;
                 r.transform = v -> getTransform();
                 if (drawingCircle){
@@ -243,8 +260,9 @@ int main() {
                 }else{
                     radiusSortedEpicycles[i].drawWithNoCircles(window, r);
                 }
-
             }
+
+//            std::cout << "DRAW CIRCLE" << std::endl;
         }
 
         end = std::chrono::high_resolution_clock::now();

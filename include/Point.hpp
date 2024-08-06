@@ -1,7 +1,7 @@
 #pragma once
 
 #include <complex>
-#include <SFML/graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 
 using complex = std::complex<double>;
