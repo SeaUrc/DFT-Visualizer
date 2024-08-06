@@ -50,11 +50,8 @@ void compute(Point origin){
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode().getFullscreenModes()[0], "DFT vectors", sf::Style::Titlebar);
+    sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors", sf::Style::Titlebar);
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
-//    sf::View view1;
-//    view1.reset(sf::FloatRect(0.0f, 0.0f, 2560.0f, 1600.0f));
-//    window.setView(view1);
     sf::Font font;
     if (!font.loadFromFile("/Users/nick/CLionProjects/DFT/font/font.ttf"))
     {
@@ -65,11 +62,12 @@ int main() {
 
     sf::Clock clock;
 //
-//    std::vector<Point> test = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
-//    for (Point &p : test){
-//        std::cout << p << std::endl;
-//    }
-//    return 0;
+    std::vector<Point> inputPoints = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
+    for (Point &p : inputPoints){
+        p = p - Point(300, 300);
+    }
+    sig.setPoints(inputPoints);
+
 
     while (window.isOpen())
     {

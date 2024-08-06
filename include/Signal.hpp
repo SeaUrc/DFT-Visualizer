@@ -34,6 +34,10 @@ public:
         return res;
     }
 
+    void setPoints(std::vector<Point> p){
+        points = p;
+    }
+
     Signal(){
 
     }

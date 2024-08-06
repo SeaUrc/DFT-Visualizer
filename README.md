@@ -10,3 +10,7 @@ Program that takes in points (drawn by a user) and computes its discrete Fourier
 - S : add epicycle
 - T : track point
 - Scroll : zoom in/out
+
+# Inputting points
+Acceptable file types: .csv <br>
+You can use this site https://spotify.github.io/coordinator/ to convert svgs into csv of points
