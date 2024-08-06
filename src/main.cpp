@@ -59,11 +59,11 @@ int main() {
 
     sf::Clock clock;
 //
-//    std::vector<Point> test = extractPointsFromSVG("/Users/nick/CLionProjects/DFT/src/test.svg");
-//    for (Point &p : test){
-//        std::cout << p << std::endl;
-//    }
-//    return 0;
+    std::vector<Point> test = extractPointsFromSVG("/Users/nick/CLionProjects/DFT/src/test.svg");
+    for (Point &p : test){
+        std::cout << p << std::endl;
+    }
+    return 0;
 
     while (window.isOpen())
     {
