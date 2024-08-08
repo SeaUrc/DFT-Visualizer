@@ -19,7 +19,7 @@ Acceptable file types: .csv <br>
 You can use this site https://spotify.github.io/coordinator/ to convert svgs into csv of points
 
 # Images
-![demo_1](https://github.com/SeaUrc/DFT-Visualizer/tree/main/screenshots/bunny.png)
-![demo_2](https://github.com/SeaUrc/DFT-Visualizer/tree/main/screenshots/helloWorld.png)
-![demo_3](https://github.com/SeaUrc/DFT-Visualizer/tree/main/screenshots/zoom1.png)
-![demo_4](https://github.com/SeaUrc/DFT-Visualizer/tree/main/screenshots/zoom2.png)
+![demo_1](https://github.com/SeaUrc/DFT-Visualizer/blob/main/screenshots/bunny.png?raw=true)
+![demo_2](https://github.com/SeaUrc/DFT-Visualizer/blob/main/screenshots/helloWorld.png?raw=true)
+![demo_3](https://github.com/SeaUrc/DFT-Visualizer/blob/main/screenshots/zoom1.png?raw=true)
+![demo_4](https://github.com/SeaUrc/DFT-Visualizer/blob/main/screenshots/zoom2.png?raw=true)
