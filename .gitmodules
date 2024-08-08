@@ -1,0 +1,3 @@
+[submodule "external/SimpleFileDialog"]
+	path = external/SimpleFileDialog
+	url = https://github.com/ConstantRobotics-Ltd/SimpleFileDialog.git

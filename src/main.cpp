@@ -49,6 +49,7 @@ void compute(Point origin){
     }
 }
 
+
 int main() {
     sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors", sf::Style::Titlebar);
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
@@ -62,11 +63,12 @@ int main() {
 
     sf::Clock clock;
 //
-    std::vector<Point> inputPoints = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
-    for (Point &p : inputPoints){
-        p = p - Point(300, 300);
-    }
-    sig.setPoints(inputPoints);
+//    std::vector<Point> inputPoints = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
+//    for (Point &p : inputPoints){
+//        p = p - Point(300, 300);
+//    }
+//    sig.setPoints(inputPoints);
+
 
 
     while (window.isOpen())
@@ -134,6 +136,9 @@ int main() {
                 }
                 if (event.key.code == sf::Keyboard::L){
                     drawingCircle = !drawingCircle;
+                }
+                if (event.key.code == sf::Keyboard::I){
+                    std::cout << openFileDialog() << std::endl;
                 }
             }
         }

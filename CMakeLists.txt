@@ -14,6 +14,7 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_subdirectory(external/tinyxml2)
+add_subdirectory(external/nativefiledialog-extended)
 
 set(SOURCE_FILES src/main.cpp)
 set_source_files_properties(${CMAKE_SOURCE_DIR}/Info.plist PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -23,7 +24,7 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE src/main.cpp ${CMAKE_SOURCE_DIR}/In
 #find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE "include" "lib")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window sfml-network sfml-audio)
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window sfml-network sfml-audio nfd)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 set(MACOSX_BUNDLE_BUNDLE_NAME "DFT")

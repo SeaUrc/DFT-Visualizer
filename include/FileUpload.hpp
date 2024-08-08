@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cctype>
 
+#include "nfd.hpp"
+
 
 std::vector<Point> sampleCircle(float cx, float cy, float r, int numSamples = 100) {
     std::vector<Point> points;
@@ -107,6 +109,26 @@ std::vector<Point> sampleEllipse(float cx, float cy, float rx, float ry, int num
 //    return points;
 //}
 
+std::string openFileDialog(){
+    NFD::Guard nfdGuard;
+
+    // auto-freeing memory
+    NFD::UniquePath outPath;
+
+    // prepare filters for the dialog
+    nfdfilteritem_t filterItem[2] = {{"Source code", "c,cpp,cc"}, {"Headers", "h,hpp"}};
+
+    // show the dialog
+    nfdresult_t result = NFD::OpenDialog(outPath, filterItem, 2);
+    if (result == NFD_OKAY) {
+        std::cout << "Success!" << std::endl << outPath.get() << std::endl;
+    } else if (result == NFD_CANCEL) {
+        std::cout << "User pressed cancel." << std::endl;
+    } else {
+        std::cout << "Error: " << NFD::GetError() << std::endl;
+    }
+    return outPath.get();
+}
 
 std::vector<Point> extractPointsFromCSV(const char* csvFile) {
     std::vector<Point> points;
