@@ -1,5 +1,5 @@
 # About
-Program that takes in points (drawn by a user) and computes its discrete Fourier transform. Using the coefficients, cycloids are generated to trace out the path that was drawn. Uses SFML graphics library. Work in progress.
+Program that takes in points (drawn by a user or csv) and computes its discrete Fourier transform. Using the coefficients, cycloids are generated to trace out the path that was drawn. Uses SFML 2.6 graphics library.
 
 # Download
 [Download release](https://github.com/SeaUrc/DFT-Visualizer/releases)
