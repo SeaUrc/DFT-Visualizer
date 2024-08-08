@@ -3,10 +3,9 @@
 #ifndef CONSTS_H
 #define CONSTS_H
 
-extern double speedMulti = 0.05;
+extern double speedMulti;
 
-
-struct Consts{
+struct Consts {
     static constexpr double PI = 3.1415926535897932384626;
 
     static const int pointMulti = 10;
@@ -14,9 +13,6 @@ struct Consts{
     static const int secToMilli = 1000;
 
     constexpr static const float minZoom = 0.1;
-
 };
-
-
 
 #endif

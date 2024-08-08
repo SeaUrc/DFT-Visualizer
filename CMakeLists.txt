@@ -13,7 +13,6 @@ FetchContent_Declare(SFML
         GIT_TAG 2.6.1)
 FetchContent_MakeAvailable(SFML)
 
-add_subdirectory(external/tinyxml2)
 add_subdirectory(external/nativefiledialog-extended)
 
 set(SOURCE_FILES src/main.cpp)

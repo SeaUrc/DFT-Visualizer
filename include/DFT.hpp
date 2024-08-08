@@ -1,3 +1,5 @@
+#pragma once
+
 #include <complex>
 #include <Consts.hpp>
 #include <algorithm>
@@ -26,6 +28,7 @@ public :
 
     void DFT() {
         dftRes.clear();
+
         for (int k = 0; k < N; k++) {
             complex sum = complex(0, 0);
             for (int n = 0; n < N; n++) {
@@ -34,7 +37,6 @@ public :
                 complex res = coords[n] * c;
                 sum = sum + res;
             }
-
 
             std::vector<double> res;
             res.push_back(sum.real() / N);
