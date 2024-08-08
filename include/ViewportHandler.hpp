@@ -31,6 +31,10 @@ struct ViewState{
         mousePos = pos;
         mouseAbsPos = center + (pos - origin)/zoom;
     }
+
+    sf::Vector2f convert(sf::Vector2f pos) const{
+        return (center + (pos - origin)/zoom);
+    }
 };
 
 class ViewportHandler{
@@ -100,5 +104,9 @@ public:
 
     float getZoom(){
         return this->state.zoom;
+    }
+
+    sf::Vector2f convert(sf::Vector2f pos){
+        return this->state.convert(pos);
     }
 };

@@ -41,7 +41,7 @@ public:
         vertices[2].position = point2 - offset;
         vertices[3].position = point1 - offset;
 
-        for (auto & vertice : vertices)
+        for (auto &vertice : vertices)
             vertice.color = color;
     }
 

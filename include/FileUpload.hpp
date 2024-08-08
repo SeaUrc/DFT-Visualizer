@@ -116,14 +116,14 @@ std::string openFileDialog(){
     NFD::UniquePath outPath;
 
     // prepare filters for the dialog
-    nfdfilteritem_t filterItem[2] = {{"Source code", "c,cpp,cc"}, {"Headers", "h,hpp"}};
+    nfdfilteritem_t filterItem[1] = {{"Source code", "csv"}};
 
     // show the dialog
-    nfdresult_t result = NFD::OpenDialog(outPath, filterItem, 2);
+    nfdresult_t result = NFD::OpenDialog(outPath, filterItem, 1);
     if (result == NFD_OKAY) {
-        std::cout << "Success!" << std::endl << outPath.get() << std::endl;
+//        std::cout << "Success!" << std::endl << outPath.get() << std::endl;
     } else if (result == NFD_CANCEL) {
-        std::cout << "User pressed cancel." << std::endl;
+//        std::cout << "User pressed cancel." << std::endl;
     } else {
         std::cout << "Error: " << NFD::GetError() << std::endl;
     }

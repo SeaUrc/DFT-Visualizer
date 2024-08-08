@@ -18,6 +18,7 @@ bool clicking = false;
 bool tracking = false;
 bool drawing = false;
 bool drawingCircle = true;
+bool shifting = false;
 
 std::vector<Cycloid> cycles;
 Signal sig = Signal();
@@ -32,18 +33,12 @@ std::chrono::high_resolution_clock::time_point end;
 double fps = -1.0;
 
 void compute(Point origin){
-//    std::cout << "INSIDE COMPUTE" << std::endl;
     std::vector<complex> points = sig.getComplex();
     reverse(points.begin(), points.end());
-//    std::cout << "REVERSE POINTS" << std::endl;
     Fourier f = Fourier(points, origin);
     f.DFT();
-//    std::cout << "DFT" << std::endl;
-//    f.sortRes();
     cycles = f.constructEpicycles();
-//    std::cout << "EPICYCLES" << std::endl;
     Fourier::sortByFrequency(cycles);
-//    std::cout << "SORT" << std::endl;
     if (!cycles.empty()){
         drawing = true;
     }
@@ -51,10 +46,10 @@ void compute(Point origin){
 
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFT vectors", sf::Style::Titlebar);
+    sf::RenderWindow window(sf::VideoMode().getDesktopMode(), "DFTv1 vectors", sf::Style::Titlebar);
     window.setVerticalSyncEnabled(true); // syncs application refresh rate to vertical freq. of monitor
     sf::Font font;
-    if (!font.loadFromFile("/Users/nick/CLionProjects/DFT/font/font.ttf"))
+    if (!font.loadFromFile("/Users/nick/CLionProjects/DFTv1/font/font.ttf"))
     {
         throw std::invalid_argument("Can't load font!");
     }
@@ -63,7 +58,7 @@ int main() {
 
     sf::Clock clock;
 //
-//    std::vector<Point> inputPoints = extractPointsFromCSV("/Users/nick/CLionProjects/DFT/src/coordinator.csv");
+//    std::vector<Point> inputPoints = extractPointsFromCSV("/Users/nick/CLionProjects/DFTv1/src/coordinator.csv");
 //    for (Point &p : inputPoints){
 //        p = p - Point(300, 300);
 //    }
@@ -97,10 +92,18 @@ int main() {
             if (event.type == sf::Event::MouseWheelMoved)
             {
                 if (abs(event.mouseWheel.delta) >= 1 && tracking){
-                    v -> setZoom( v->getZoom() / pow(.95, event.mouseWheel.delta*0.1));
+                    if (shifting){
+                        v -> setZoom( v->getZoom() / pow(.95, event.mouseWheel.delta*0.7));
+                    }else{
+                        v -> setZoom( v->getZoom() / pow(.95, event.mouseWheel.delta*0.1));
+                    }
+
                 }
             }
             if (event.type == sf::Event::KeyPressed){
+                if (event.key.code == sf::Keyboard::LShift || event.key.code==sf::Keyboard::RShift){
+                    shifting = !shifting;
+                }
                 if (event.key.code == sf::Keyboard::C){
                     epicyclePath.clear();
                     userPaths.clear();
@@ -112,23 +115,36 @@ int main() {
                     v -> setZoom(1);
                 }
                 if (event.key.code == sf::Keyboard::D){
-//                    std::cout << "D!" << std::endl;
                     compute(Point(v -> getOrigin()));
-                    epicyclePath.clear();
-//                    std::cout << "CLEAR!" << std::endl;
-                }
+                    epicyclePath.clear();}
                 if (event.key.code == sf::Keyboard::A){
-                    maxCoef--;
+                    if (shifting){
+                        maxCoef -= 10;
+                    }else{
+                        maxCoef--;
+                    }
                 }
                 if (event.key.code == sf::Keyboard::S){
-                    maxCoef++;
+                    if (shifting){
+                        maxCoef += 10;
+                    }else{
+                        maxCoef++;
+                    }
                 }
                 if (event.key.code == sf::Keyboard::Z){
-                    speedMulti *= 0.95;
+                    if (shifting){
+                        speedMulti *= 0.6;
+                    }else{
+                        speedMulti *= 0.95;
+                    }
                     epicyclePath.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::X){
-                    speedMulti /= 0.95;
+                    if (shifting){
+                        speedMulti /= 0.6;
+                    }else{
+                        speedMulti /= 0.95;
+                    }
                     epicyclePath.clear(); // prevent jumping
                 }
                 if (event.key.code == sf::Keyboard::T){
@@ -139,6 +155,19 @@ int main() {
                 }
                 if (event.key.code == sf::Keyboard::I){
                     std::cout << openFileDialog() << std::endl;
+                    std::string inputFile = openFileDialog();
+                    std::vector<Point> inputPoints = extractPointsFromCSV(inputFile.c_str());
+                    std::vector<Point> sigPoints = inputPoints;
+                    for (Point &p : sigPoints){
+                        p = p-Point(v->getOrigin());
+                    }
+                    sig.setPoints(sigPoints);
+                    std::vector<sf::Vector2f> inputVec2f(inputPoints.size());
+                    for (size_t i = 0; i<inputPoints.size(); ++i){
+                        inputVec2f[i] = sf::Vector2f(inputPoints[i]);
+                    }
+                    userPaths.resize(1);
+                    userPaths[0] = inputVec2f;
                 }
             }
         }
@@ -162,39 +191,6 @@ int main() {
 
         window.clear(sf::Color::Black);
 
-        /*------Text------*/
-        std::vector<sf::Text> texts;
-        sf::Text computeFourier("Compute epicycles (D)", font, 15);
-        sf::Text clearText("Clear text (C)", font, 15);
-        sf::Text epicycleNumText("Number of epicycles (A: -1, S: +1): " + std::to_string(maxCoef), font, 15);
-        sf::Text speedMultiText("Speed multiplier (Z: *0.95, X: /0.95): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
-        sf::Text zoomText("Zoom (scroll wheel, only when tracking): " + std::to_string(v->getZoom()).substr(0, 3), font, 15);
-        sf::Text trackText("Camera track (T)", font, 15);
-        sf::Text showCircle("Toggle circles (L)", font, 15);
-
-        texts.push_back(computeFourier);
-        texts.push_back(clearText);
-        texts.push_back(epicycleNumText);
-        texts.push_back(speedMultiText);
-        texts.push_back(zoomText);
-        texts.push_back(trackText);
-        texts.push_back(showCircle);
-
-
-        for (int i=0; i<texts.size(); i++){
-            texts[i].setFillColor(sf::Color::White);
-            texts[i].setPosition(10.0f, 10.0f + 25.0f*(float)i);
-            window.draw(texts[i]);
-        }
-
-
-        /*------FPS------*/
-        sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
-        fpsText.setFillColor(sf::Color::White);
-        fpsText.setPosition(window.getSize().x-100, 10);
-        window.draw(fpsText);
-
-
 
         /*------Drawing User Path------*/
         for (std::vector<sf::Vector2f> &userP : userPaths){
@@ -217,19 +213,15 @@ int main() {
             }
 
             Fourier::sortByRadius(radiusSortedEpicycles);
-//            std::cout << "SORTv2" << std::endl;
 
             Point pos = v->getOrigin();
 
             for (size_t i=0; i<radiusSortedEpicycles.size(); ++i){
-//                std::cout << pos << std::endl;
                 radiusSortedEpicycles[i].update(clock.getElapsedTime(), pos);
-//                std::cout << "UPDATE" << std::endl;
                 pos = radiusSortedEpicycles[i].getEndPoint();
 
             }
 
-//            std::cout << "UPDATE" << std::endl;
 
             if (tracking){
                 v -> setCenter(sf::Vector2f(pos.x - window.getSize().x*0.5f, pos.y - window.getSize().y*0.5f)); // center relative to origin
@@ -242,7 +234,6 @@ int main() {
                 epicyclePath.pop_front();
             }
 
-//            std::cout << "PATH POP" << std::endl;
 
             epicyclePath.push_back(sf::Vector2f(pos));
 
@@ -253,7 +244,6 @@ int main() {
                 l.draw(window, r);
             }
 
-//            std::cout << "DRAW PATH" << std::endl;
 
             for (size_t i=0; i<radiusSortedEpicycles.size() && i < maxCoef; ++i){
                 sf::RenderStates r;
@@ -265,8 +255,46 @@ int main() {
                 }
             }
 
-//            std::cout << "DRAW CIRCLE" << std::endl;
         }
+
+        /*------Text------*/
+        std::vector<sf::Text> texts;
+        sf::Text computeFourier("Compute epicycles (D)", font, 15);
+        sf::Text clearText("Clear text (C)", font, 15);
+        sf::Text epicycleNumText("Number of epicycles (A: -1 | S: +1) : " + std::to_string(maxCoef), font, 15);
+        sf::Text speedMultiText("Speed multiplier (Z: *0.95 | X: /0.95): " + std::to_string(speedMulti).substr(0, 5), font, 15); // diplay up to third decimal
+        sf::Text zoomText("Zoom (scroll wheel, only when tracking): " + std::to_string(v->getZoom()).substr(0, 3), font, 15);
+        std::string trackOn = (tracking ? "ON" : "OFF");
+        sf::Text trackText("Camera track (T) " + trackOn,  font, 15);
+        std::string circleOn = (drawingCircle ? "ON" : "OFF");
+        sf::Text showCircle("Toggle circles (L) " + circleOn, font, 15);
+        sf::Text inputText("Load csv file (I)", font, 15);
+        std::string multi = (shifting ? "ON" : "OFF");
+        sf::Text shiftText("Toggle 10x multiplier on inputs (shift) " + multi, font, 15);
+
+        texts.push_back(computeFourier);
+        texts.push_back(clearText);
+        texts.push_back(epicycleNumText);
+        texts.push_back(speedMultiText);
+        texts.push_back(zoomText);
+        texts.push_back(trackText);
+        texts.push_back(showCircle);
+        texts.push_back(inputText);
+        texts.push_back(shiftText);
+
+
+        for (int i=0; i<texts.size(); i++){
+            texts[i].setFillColor(sf::Color::White);
+            texts[i].setPosition(10.0f, 10.0f + 25.0f*(float)i);
+            window.draw(texts[i]);
+        }
+
+
+        /*------FPS------*/
+        sf::Text fpsText("FPS " + std::to_string(fps).substr(0, 4), font, 15);
+        fpsText.setFillColor(sf::Color::White);
+        fpsText.setPosition(window.getSize().x-100, 10);
+        window.draw(fpsText);
 
         end = std::chrono::high_resolution_clock::now();
         fps = (fps*4.0f +(double)1e9/(double)std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/5.0f; // weighted avg
