@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 
-#ifndef CONSTS_H
-#define CONSTS_H
+#pragma once
 
 extern double speedMulti;
 
@@ -14,5 +13,3 @@ struct Consts {
 
     constexpr static const float minZoom = 0.1;
 };
-
-#endif

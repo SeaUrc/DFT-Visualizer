@@ -13,13 +13,10 @@
 std::string openFileDialog() {
     NFD::Guard nfdGuard;
 
-    // auto-freeing memory
     NFD::UniquePath outPath;
 
-    // prepare filters for the dialog
     nfdfilteritem_t filterItem[1] = {{"Source code", "csv"}};
 
-    // show the dialog
     nfdresult_t result = NFD::OpenDialog(outPath, filterItem, 1);
     if (result == NFD_OKAY) {}
     else if (result == NFD_CANCEL) {}
